@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 
 import Spinner from "../spinner/Spinner";
@@ -16,6 +16,7 @@ class CharList extends Component {
     offset: 1541,
     charEnded: false,
   };
+  charRef = React.createRef();
 
   marvelService = new MarvelService();
 
@@ -66,8 +67,29 @@ class CharList extends Component {
     this.setState({ loading: false, error: true });
   };
 
+  // Мой вариант без использования ref
+  // onCharSelectedStyle = (elem) => {
+  //   const selectedElem = document.querySelector(".char__item_selected");
+  //   if (selectedElem) {
+  //     selectedElem.className = 'char__item';
+  //   }
+  //   elem.className = `${elem.className} char__item_selected`;
+  // };
+
+  itemRefs = [];
+
+  setRef = (ref) => {
+    this.itemRefs.push(ref)
+  }
+
+  focusOnItem = (id) => {
+    this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
+    this.itemRefs[id].classList.add('char__item_selected');
+    this.itemRefs[id].focus();
+  }
+
   renderItems(arr) {
-    const items = arr.map((item) => {
+    const items = arr.map((item, i) => {
       let imgStyle = { objectFit: "cover" };
       if (
         item.thumbnail ===
@@ -78,9 +100,19 @@ class CharList extends Component {
 
       return (
         <li
+          ref={this.setRef}
+          tabIndex={0}
           key={item.id}
           className="char__item"
-          onClick={() => this.props.onCharSelected(item.id)}
+          // Мой варирант:
+          // onClick={(e) => {
+          //   this.props.onCharSelected(item.id);
+          //   this.onCharSelectedStyle(e.target.parentElement);
+          // }}
+          onClick={() => {
+            this.props.onCharSelected(item.id);
+            this.focusOnItem(i);;
+          }}
         >
           <img style={imgStyle} src={item.thumbnail} alt={item.name} />
           <div className="char__name">{item.name}</div>
