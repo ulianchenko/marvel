@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
+import {CSSTransition, TransitionGroup} from 'react-transition-group';
 
 import Spinner from "../spinner/Spinner";
 import ErrorMessage from "../errorMessage/ErrorMessage";
@@ -56,34 +57,46 @@ const CharList = (props) => {
       }
 
       return (
-        <li
-          ref={(el) => (itemRefs.current[i] = el)}
-          tabIndex={0}
-          key={item.id}
-          className="char__item"
-          onClick={() => {
-            props.onCharSelected(item.id);
-            focusOnItem(i);
-          }}
-          onKeyPress={(e) => {
-            if (e.key === " " || e.key === "Enter") {
+        <CSSTransition key={item.id} timeout={700} classNames='char__item'>
+          <li
+            ref={(el) => (itemRefs.current[i] = el)}
+            tabIndex={0}
+            // key={item.id}
+            className="char__item"
+            onClick={() => {
               props.onCharSelected(item.id);
               focusOnItem(i);
-            }
-          }}
-        >
-          <img style={imgStyle} src={item.thumbnail} alt={item.name} />
-          <div className="char__name">{item.name}</div>
-        </li>
+            }}
+            onKeyPress={(e) => {
+              if (e.key === " " || e.key === "Enter") {
+                props.onCharSelected(item.id);
+                focusOnItem(i);
+              }
+            }}
+          >
+            <img style={imgStyle} src={item.thumbnail} alt={item.name} />
+            <div className="char__name">{item.name}</div>
+          </li>
+        </CSSTransition>
       );
     });
 
-    return <ul className="char__grid">{items}</ul>;
+    // return <ul className="char__grid">{items}</ul>;
+    return <ul className="char__grid">
+      <TransitionGroup component={null}>
+        {items}
+      </TransitionGroup>
+    </ul>;
   }
 
   const items = renderItems(charList);
   const errorMessage = error ? <ErrorMessage /> : null;
   const spinner = loading && !newItemLoading ? <Spinner /> : null; // проверяем происходит ли загрузка, но только первичная, а не дозагрузка новых персонажей после нажатия кнопки load more
+  if(loading) {
+    import('./someFunc')
+      .then(obj => obj.default())
+      .catch();
+  }
 
   return (
     <div className="char__list">
